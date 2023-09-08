@@ -15,10 +15,22 @@ def ensure_afunc(coro: Coroutine | Callable) -> Callable:
 
 
 def run_async(coro: Coroutine | Callable):
+    """Compare with anyio.run and asyncio.run
+
+    Usage::
+        >>> async def afunc(n=1):
+        ...     return n
+        ...
+        >>> run_async(afunc)  # get the same result as: await afunc()
+        1
+        >>> run_async(afunc(2))  # get the same result as: await afunc(2)
+        2
+    """
     return anyio.run(ensure_afunc(coro))
 
 
 async def gather(*coros):
+    """Similar like asyncio.gather, but return a list"""
     results = [None] * len(coros)
 
     async def runner(coro, i):
@@ -33,6 +45,21 @@ async def gather(*coros):
 
 @asynccontextmanager
 async def start_tasks(coro: Coroutine | Callable, *more: Coroutine | Callable):
+    """Make it easy to convert asyncio.create_task
+
+    Usage:
+
+    .. code-block:: python3
+
+        async def startup():
+            # cost a long time to do sth async
+            await anyio.sleep(1000)
+
+        @contextlib.asynccontextmanager
+        async def lifespan(app):
+            async with start_tasks(startup()):
+                yield
+    """
     async with anyio.create_task_group() as tg:
         with anyio.CancelScope(shield=True):
             tg.start_soon(ensure_afunc(coro))
