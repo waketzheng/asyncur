@@ -1,12 +1,9 @@
 # asyncur
-Some async functions that using anyio
+[![LatestVersionInPypi](https://img.shields.io/pypi/v/asyncur.svg?style=flat)](https://pypi.python.org/pypi/asyncur)
+[![GithubActionResult](https://github.com/waketzheng/asyncur/workflows/ci/badge.svg)](https://github.com/waketzheng/asyncur/actions?query=workflow:ci)
+[![Coverage](https://coveralls.io/repos/github/waketzheng/asyncur/badge.svg)](https://coveralls.io/github/waketzheng/asyncur)
 
-.. image:: https://img.shields.io/pypi/v/asyncur.svg?style=flat
-   :target: https://pypi.python.org/pypi/asyncur
-.. image:: https://github.com/tortoise/tortoise-orm/workflows/ci/badge.svg
-   :target: https://github.com/tortoise/tortoise-orm/actions?query=workflow:ci
-.. image:: https://coveralls.io/repos/github/tortoise/tortoise-orm/badge.svg
-   :target: https://coveralls.io/github/tortoise/tortoise-orm
+Some async functions that using anyio
 
 ## Requirements
 
