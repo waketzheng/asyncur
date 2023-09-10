@@ -5,6 +5,7 @@ import anyio
 
 
 def ensure_afunc(coro: Coroutine | Callable) -> Callable:
+    """Wrap coroutine to be async function"""
     if callable(coro):
         return coro
 
