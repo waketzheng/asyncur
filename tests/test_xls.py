@@ -22,3 +22,8 @@ async def test_read():
         {"Column1": "r2c1\n00", "Column2\nMultiLines": "r2 c2", "Column 3": 2, 4: ""},
     ]
     assert data == (await load_xls(demo))
+
+    assert (await load_xls(demo, True)) == [
+        {"Column1": "row1-\\t%c", "Column2\nMultiLines": "0", "Column 3": "1", 4: ""},
+        {"Column1": "r2c1\n00", "Column2\nMultiLines": "r2 c2", "Column 3": "2", 4: ""},
+    ]

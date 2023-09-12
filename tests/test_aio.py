@@ -39,11 +39,14 @@ async def test_gather():
 async def test_start_tasks():
     root = anyio.Path(__file__).parent
     names = ("tmp.txt", "tmp2.txt", "tmp3.txt")
+
     async def remove_files():
         for name in names:
             if await (p := root / name).exists():
                 await p.unlink()
+
     await remove_files()
+
     async def startup():
         await root.joinpath(names[0]).touch()
         await anyio.sleep(1)
