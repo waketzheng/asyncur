@@ -31,13 +31,13 @@ jobs:
           python-version: "3.11"
       - name: Prepare pip/poetry
         run: |
-          python -m pip install --upgrade pip poetry
+          python -m pip install --upgrade pip poetry fast-tort-cli
           poetry config virtualenvs.create false
       - name: Install requirements
-        run: poetry install
+        run: fast sync
       - name: Check code style and Type Hint
         run: fast check
       - name: build
         run: poetry build
       - name: Test with pytest
-        run: pytest
+        run: fast test
