@@ -1,5 +1,5 @@
 from contextlib import asynccontextmanager
-from typing import Callable, Coroutine
+from typing import Any, Callable, Coroutine
 
 import anyio
 
@@ -15,7 +15,7 @@ def ensure_afunc(coro: Coroutine | Callable) -> Callable:
     return do_await
 
 
-def run_async(coro: Coroutine | Callable):
+def run_async(coro: Coroutine | Callable) -> Any:
     """Compare with anyio.run and asyncio.run
 
     Usage::
@@ -30,7 +30,7 @@ def run_async(coro: Coroutine | Callable):
     return anyio.run(ensure_afunc(coro))
 
 
-async def gather(*coros):
+async def gather(*coros) -> list:
     """Similar like asyncio.gather, but return a list"""
     results = [None] * len(coros)
 
