@@ -30,7 +30,7 @@ jobs:
       - name: Install requirements
         run: fast sync
       - name: Check code style and Type Hint
-        run: fast check
+        run: fast lint
       - name: build
         run: poetry build
       - name: Test with pytest
