@@ -1,7 +1,7 @@
 # This workflow will install Python dependencies, run tests and lint with a single version of Python
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
 
-name: Unittest and Coverage
+name: ci
 
 on:
   push:
@@ -44,7 +44,7 @@ jobs:
       - name: build
         run: poetry build
       - name: Test with pytest
-        run: poetry run pytest
+        run: poetry run coverage run --source=asyncur -m pytest
       - name: Upload Coverage
         run: poetry run coveralls --service=github
         env:
@@ -53,13 +53,14 @@ jobs:
           COVERALLS_PARALLEL: true
 
   coveralls:
-    name: Finish Coveralls
+    name: Indicate completion to coveralls.io
     needs: test
     runs-on: ubuntu-latest
+    container: python:3-slim
     steps:
-      - name: Finished
-        run: |
-          pip3 install --upgrade coveralls
-          coveralls --finish
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Finished
+      run: |
+        pip3 install --upgrade coveralls
+        coveralls --service=github --finish
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
