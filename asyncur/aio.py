@@ -68,3 +68,8 @@ async def start_tasks(coro: Coroutine | Callable, *more: Coroutine | Callable):
                 tg.start_soon(ensure_afunc(c))
             yield
             tg.cancel_scope.cancel()
+
+
+async def wait_for(coro: Coroutine, timeout: int | float) -> Any:
+    with anyio.fail_after(timeout):
+        return await coro

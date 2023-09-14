@@ -6,7 +6,7 @@ from typing import Any
 import anyio
 import pytest
 
-from asyncur.aio import gather, run_async, start_tasks
+from asyncur.aio import gather, run_async, start_tasks, wait_for
 
 
 def test_run_async():
@@ -19,6 +19,17 @@ def test_run_async():
     assert run_async(foo(None)) is None
     assert run_async(foo(foo)) == foo
     assert run_async(functools.partial(foo, 2)) == 2
+
+
+@pytest.mark.anyio
+async def test_wait_for():
+    async def do_sth(seconds=0.2):
+        await anyio.sleep(seconds)
+        return seconds
+
+    assert (await wait_for(do_sth(), 1)) == 0.2
+    with pytest.raises(TimeoutError):
+        await wait_for(do_sth(), 0.1)
 
 
 @pytest.mark.anyio
