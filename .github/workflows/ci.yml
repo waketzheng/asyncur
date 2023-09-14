@@ -1,18 +1,23 @@
-name: ci
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+
+name: Unittest and Coverage
+
 on:
   push:
-    branches-ignore:
-      - main
+    branches: [ "main" ]
   pull_request:
-    branches-ignore:
-      - main
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
-    services:
     strategy:
       matrix:
-        python-version: ["3.11", "3.12"]
+        python-version: ["3.11"]
     steps:
       - uses: actions/cache@v3
         with:
@@ -24,17 +29,26 @@ jobs:
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install and configure Poetry
+      - name: Prepare tools
         run: |
-          pip install -U pip poetry
+          python -m pip install --upgrade pip poetry coveralls
           poetry config virtualenvs.create false
       - name: Install requirements
         run: poetry install
-      - name: Run ci
-        run: coverage run -m pytest
+      - name: Check code style and Type Hint
+        run: |
+          poetry run isort --check-only --src=asyncur .
+          poetry run black --check --fast .
+          poetry run ruff .
+          poetry run mypy .
+      - name: build
+        run: poetry build
+      - name: Test with pytest
+        run: poetry run pytest
       - name: Upload Coverage
         run: coveralls --service=github
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COVERALLS_FLAG_NAME: ${{ matrix.python-version }}
           COVERALLS_PARALLEL: true
 
@@ -47,3 +61,5 @@ jobs:
         run: |
           pip3 install --upgrade coveralls
           coveralls --finish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
