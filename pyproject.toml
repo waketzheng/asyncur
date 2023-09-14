@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "asyncur"
-version = "0.1.2"
+version = "0.2.0"
 description = "Async functions to compare with anyio and asyncio, and toolkit to read/write excel with async/await."
 authors = ["Waket Zheng <waketzheng@gmail.com>"]
 readme = "README.md"
