@@ -13,7 +13,7 @@ openpyxl = "^3.1.2"
 
 
 [tool.poetry.group.dev.dependencies]
-fast-tort-cli = {extras = ["all"], version = "^0.3.4"}
+fast-tort-cli = {extras = ["all"], version = "^0.3.6"}
 pandas-stubs = "^2.0.3.230814"
 coveralls = "^3.3.1"
 

@@ -1,7 +1,7 @@
 # asyncur
 [![LatestVersionInPypi](https://img.shields.io/pypi/v/asyncur.svg?style=flat)](https://pypi.python.org/pypi/asyncur)
 [![GithubActionResult](https://github.com/waketzheng/asyncur/workflows/ci/badge.svg)](https://github.com/waketzheng/asyncur/actions?query=workflow:ci)
-[![Coverage](https://coveralls.io/repos/github/waketzheng/asyncur/badge.svg)](https://coveralls.io/github/waketzheng/asyncur)
+[![Coverage Status](https://coveralls.io/repos/github/waketzheng/asyncur/badge.svg?branch=main)](https://coveralls.io/github/waketzheng/asyncur?branch=main)
 
 Some async functions that using anyio
 
