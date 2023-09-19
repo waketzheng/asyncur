@@ -66,10 +66,13 @@ async def start_tasks(coro: Coroutine | Callable, *more: Coroutine | Callable):
             tg.start_soon(ensure_afunc(coro))
             for c in more:
                 tg.start_soon(ensure_afunc(c))
-            yield
-            tg.cancel_scope.cancel()
+            try:
+                yield
+            finally:
+                tg.cancel_scope.cancel()
 
 
 async def wait_for(coro: Coroutine, timeout: int | float) -> Any:
+    """Similar like asyncio.wait_for"""
     with anyio.fail_after(timeout):
         return await coro
