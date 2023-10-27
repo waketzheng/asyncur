@@ -30,8 +30,8 @@ def run_async(coro: Coroutine | Callable) -> Any:
     return anyio.run(ensure_afunc(coro))
 
 
-async def gather(*coros) -> list:
-    """Similar like asyncio.gather, but return a list"""
+async def gather(*coros) -> tuple:
+    """Similar like asyncio.gather"""
     results = [None] * len(coros)
 
     async def runner(coro, i):
@@ -41,7 +41,7 @@ async def gather(*coros) -> list:
         for i, coro in enumerate(coros):
             tg.start_soon(runner, coro, i)
 
-    return results
+    return tuple(results)
 
 
 @asynccontextmanager

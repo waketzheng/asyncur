@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.11"]
+        python-version: ["3.10", "3.11"]
     steps:
       - uses: actions/cache@v3
         with:
@@ -34,7 +34,9 @@ jobs:
           python -m pip install --upgrade pip poetry
           poetry config virtualenvs.create false
       - name: Install requirements
-        run: poetry install
+        run: |
+          poetry install
+          poetry run pip install isort black ruff mypy
       - name: Check code style and Type Hint
         run: |
           poetry run isort --check-only --src=asyncur .

@@ -1,21 +1,26 @@
 [tool.poetry]
 name = "asyncur"
-version = "0.2.2"
-description = "Async functions to compare with anyio and asyncio, and toolkit to read/write excel with async/await."
+version = "0.3.0"
+description = "Async functions to compare with anyio and asyncio, and toolkit to read excel with async/await."
 authors = ["Waket Zheng <waketzheng@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.11,<3.13"
+python = ">=3.10,<3.13"
 anyio = ">=3.7.1"
-pandas = "^2.1.1"
-openpyxl = "^3.1.2"
+pandas = {version = "^2.1.1", optional = true}
+openpyxl = {version = "^3.1.2", optional = true}
+
+[tool.poetry.extras]
+xls = ["pandas", "openpyxl"]
 
 
 [tool.poetry.group.dev.dependencies]
-fast-tort-cli = {extras = ["all"], version = "^0.3.10"}
+fast-tort-cli = {version = ">=0.3.10", python = "^3.11", extras = ["all"]}
 pandas-stubs = "^2.1.1.230928"
 coveralls = "^3.3.1"
+pandas = "*"
+openpyxl = "*"
 
 [build-system]
 requires = ["poetry-core"]

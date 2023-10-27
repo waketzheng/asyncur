@@ -1,7 +1,7 @@
 import importlib.metadata
+from pathlib import Path
 
-from asyncur.aio import gather, run_async, start_tasks
-from asyncur.xls import Path, load_xls, read_excel
+from asyncur.aio import gather, run_async, start_tasks, wait_for
 
 __version__ = importlib.metadata.version(Path(__file__).parent.name)
 __all__ = (
@@ -9,6 +9,5 @@ __all__ = (
     "run_async",
     "gather",
     "start_tasks",
-    "load_xls",
-    "read_excel",
+    "wait_for",
 )

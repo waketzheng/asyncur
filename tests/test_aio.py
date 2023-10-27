@@ -43,7 +43,7 @@ async def test_gather():
     async def c():
         pass
 
-    assert (await gather(a(), b(), c())) == [1, "2", None]
+    assert (await gather(a(), b(), c())) == (1, "2", None)
 
 
 @pytest.mark.anyio
