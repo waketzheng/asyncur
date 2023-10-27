@@ -36,7 +36,7 @@ jobs:
       - name: Install requirements
         run: |
           poetry install
-          poetry run pip install isort black ruff mypy
+          poetry run pip install isort black ruff mypy pytest
       - name: Check code style and Type Hint
         run: |
           poetry run isort --check-only --src=asyncur .
