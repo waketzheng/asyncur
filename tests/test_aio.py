@@ -1,3 +1,4 @@
+import asyncio
 import functools
 from contextlib import asynccontextmanager
 from datetime import datetime
@@ -32,18 +33,47 @@ async def test_wait_for():
         await wait_for(do_sth(), 0.1)
 
 
-@pytest.mark.anyio
-async def test_gather():
-    async def a():
-        return 1
+class TestGather:
+    @pytest.mark.anyio
+    async def test_gather(self):
+        async def a():
+            return 1
 
-    async def b():
-        return "2"
+        async def b():
+            return "2"
 
-    async def c():
-        pass
+        async def c():
+            pass
 
-    assert (await gather(a(), b(), c())) == (1, "2", None)
+        assert (await gather(a(), b(), c())) == (1, "2", None)
+
+    @staticmethod
+    async def raise_error_later(seconds, err_type):
+        await anyio.sleep(seconds)
+        raise err_type(f"{seconds = }")
+
+    @staticmethod
+    def is_the_same_error(e1, e2):
+        return type(e1) == type(e2) and str(e1) == str(e2)
+
+    def create_coros_for_raise(self):
+        coro1 = self.raise_error_later(0.2, ValueError)
+        coro2 = self.raise_error_later(0.1, AttributeError)
+        coro3 = self.raise_error_later(0.1, OSError)
+        return coro1, coro2, coro3
+
+    @pytest.mark.anyio
+    async def test_gather_raise(self):
+        err_asyncio = err_anyio = None
+        try:
+            await asyncio.gather(*self.create_coros_for_raise())
+        except Exception as e:
+            err_asyncio = e
+        try:
+            await gather(*self.create_coros_for_raise())
+        except Exception as e:
+            err_anyio = e
+        assert self.is_the_same_error(err_asyncio, err_anyio)
 
 
 @pytest.mark.anyio

@@ -1,7 +1,11 @@
+import sys
 from contextlib import asynccontextmanager
 from typing import Any, Callable, Coroutine
 
 import anyio
+
+if sys.version_info < (3, 11):
+    from exceptiongroup import ExceptionGroup
 
 
 def ensure_afunc(coro: Coroutine | Callable) -> Callable:
@@ -37,9 +41,12 @@ async def gather(*coros) -> tuple:
     async def runner(coro, i):
         results[i] = await coro
 
-    async with anyio.create_task_group() as tg:
-        for i, coro in enumerate(coros):
-            tg.start_soon(runner, coro, i)
+    try:
+        async with anyio.create_task_group() as tg:
+            for i, coro in enumerate(coros):
+                tg.start_soon(runner, coro, i)
+    except ExceptionGroup as e:
+        raise e.exceptions[0]
 
     return tuple(results)
 
