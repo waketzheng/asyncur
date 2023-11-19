@@ -76,51 +76,51 @@ class TestGather:
         assert self.is_the_same_error(err_asyncio, err_anyio)
 
 
-@pytest.mark.anyio
-async def test_start_tasks():
+class TestStartTasks:
     root = anyio.Path(__file__).parent
     names = ("tmp.txt", "tmp2.txt", "tmp3.txt")
 
-    async def remove_files():
-        for name in names:
-            if await (p := root / name).exists():
+    async def remove_files(self):
+        for name in self.names:
+            if await (p := self.root / name).exists():
                 await p.unlink()
 
-    await remove_files()
-
-    async def startup():
-        await root.joinpath(names[0]).touch()
+    async def startup(self):
+        await self.root.joinpath(self.names[0]).touch()
         await anyio.sleep(1)
-        await root.joinpath(names[1]).touch()
+        await self.root.joinpath(self.names[1]).touch()
 
-    async def running():
+    async def running(self):
         while True:
             now = datetime.now()
-            await root.joinpath(names[2]).write_text(str(now))
+            await self.root.joinpath(self.names[2]).write_text(str(now))
             await anyio.sleep(0.5)
 
-    @asynccontextmanager
-    async def lifespan(app):
-        now = datetime.now()
-        async with start_tasks(startup, running):
-            await anyio.sleep(0.1)
-            assert await root.joinpath(names[0]).exists()
-            assert not (await root.joinpath(names[1]).exists())
-            assert await root.joinpath(names[2]).exists()
-            await anyio.sleep(1)
-            assert await root.joinpath(names[0]).exists()
-            assert await root.joinpath(names[1]).exists()
-            assert (await root.joinpath(names[2]).read_text()) > str(now)
-            yield
-        now = datetime.now()
-        assert (await root.joinpath(names[2]).read_text()) <= str(now)
-        await remove_files()
+    @pytest.mark.anyio
+    async def test_start_tasks(self):
+        await self.remove_files()
+        root, names = self.root, self.names
 
-    async with lifespan(None):
-        assert await root.joinpath(names[0]).exists()
-        assert await root.joinpath(names[1]).exists()
-        assert await root.joinpath(names[2]).exists()
+        @asynccontextmanager
+        async def lifespan(app):
+            now = datetime.now()
+            async with start_tasks(self.startup, self.running):
+                await anyio.sleep(0.1)
+                assert await root.joinpath(names[0]).exists()
+                assert not (await root.joinpath(names[1]).exists())
+                assert await root.joinpath(names[2]).exists()
+                await anyio.sleep(1)
+                assert await root.joinpath(names[0]).exists()
+                assert await root.joinpath(names[1]).exists()
+                assert (await root.joinpath(names[2]).read_text()) > str(now)
+                yield
+            now = datetime.now()
+            assert (await root.joinpath(names[2]).read_text()) <= str(now)
+            await self.remove_files()
 
-    assert not await root.joinpath(names[0]).exists()
-    assert not await root.joinpath(names[1]).exists()
-    assert not await root.joinpath(names[2]).exists()
+        async with lifespan(None):
+            for name in names:
+                assert await root.joinpath(name).exists()
+
+        for name in names:
+            assert not await root.joinpath(name).exists()
