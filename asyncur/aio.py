@@ -5,7 +5,7 @@ from typing import Any, Callable, Coroutine
 import anyio
 
 if sys.version_info < (3, 11):
-    from exceptiongroup import ExceptionGroup
+    from exceptiongroup import ExceptionGroup  # pragma: no cover
 
 
 def ensure_afunc(coro: Coroutine | Callable) -> Callable:
@@ -36,17 +36,29 @@ def run_async(coro: Coroutine | Callable) -> Any:
 
 async def gather(*coros) -> tuple:
     """Similar like asyncio.gather"""
-    results = [None] * len(coros)
+    return await bulk_gather(coros)
+
+
+async def bulk_gather(coros, bulk: int | None = None, raises=True) -> tuple:
+    total = len(coros)
+    results = [None] * total
 
     async def runner(coro, i):
         results[i] = await coro
 
     try:
-        async with anyio.create_task_group() as tg:
-            for i, coro in enumerate(coros):
-                tg.start_soon(runner, coro, i)
+        if bulk:
+            for start in range(0, total, bulk):
+                async with anyio.create_task_group() as tg:
+                    for index, coro in enumerate(coros[start : start + bulk]):
+                        tg.start_soon(runner, coro, start + index)
+        else:
+            async with anyio.create_task_group() as tg:
+                for i, coro in enumerate(coros):
+                    tg.start_soon(runner, coro, i)
     except ExceptionGroup as e:
-        raise e.exceptions[0]
+        if raises:
+            raise e.exceptions[0]
 
     return tuple(results)
 

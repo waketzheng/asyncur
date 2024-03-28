@@ -7,7 +7,7 @@ from typing import Any
 import anyio
 import pytest
 
-from asyncur.aio import gather, run_async, start_tasks, wait_for
+from asyncur.aio import gather, run_async, start_tasks, wait_for, bulk_gather
 
 
 def test_run_async():
@@ -59,7 +59,7 @@ class TestGather:
     def create_coros_for_raise(self):
         coro1 = self.raise_error_later(0.2, ValueError)
         coro2 = self.raise_error_later(0.1, AttributeError)
-        coro3 = self.raise_error_later(0.1, OSError)
+        coro3 = self.raise_error_later(0.11, OSError)
         return coro1, coro2, coro3
 
     @pytest.mark.anyio
@@ -74,6 +74,11 @@ class TestGather:
         except Exception as e:
             err_anyio = e
         assert self.is_the_same_error(err_asyncio, err_anyio)
+
+    @pytest.mark.anyio
+    async def test_gather_without_raise(self):
+        results = await bulk_gather(self.create_coros_for_raise(), raises=False)
+        assert results == (None, None, None)
 
 
 class TestStartTasks:

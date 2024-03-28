@@ -27,11 +27,31 @@ poetry add asyncur
 
 - gather/run_async
 ```py
+>>> from asyncur import gather, run_async
 >>> async def foo():
 ...     return 1
 ...
 >>> run_async(gather(foo(), foo()))
 (1, 1)
+```
+- timeit
+```py
+>>> import time
+>>> import anyio
+>>> from asyncur import timeit
+>>> @timeit
+... async def sleep_test():
+...     await anyio.sleep(3)
+...
+>>> await sleep()
+sleep_test Cost: 3.0 seconds
+
+>>> @timeit
+... def sleep_test2():
+...     time.sleep(3.1)
+...
+>>> sleep_test2()
+sleep_test2 Cost: 3.1 seconds
 ```
 
 - Read Excel File(need to install with xls extra: `pip install "asyncur[xls]"`)
