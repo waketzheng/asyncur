@@ -133,14 +133,14 @@ def timeit(func: Callable[..., FnT]) -> Callable[..., FnT]:
     if inspect.iscoroutinefunction(func):
 
         @functools.wraps(func)
-        async def deco(*args, **kwargs) -> Any:
+        async def deco(*args, **kwargs) -> FnT:
             async with Timer(func_name):
                 return await func(*args, **kwargs)
 
     else:
 
         @functools.wraps(func)
-        def deco(*args, **kwargs) -> Any:
+        def deco(*args, **kwargs) -> FnT:
             with Timer(func_name):
                 return func(*args, **kwargs)
 
