@@ -7,7 +7,7 @@ from typing import Any
 import anyio
 import pytest
 
-from asyncur.aio import gather, run_async, start_tasks, wait_for, bulk_gather
+from asyncur.aio import bulk_gather, gather, run_async, start_tasks, wait_for
 
 
 def test_run_async():

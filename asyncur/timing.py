@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import functools
 import inspect
 import time
@@ -6,7 +8,10 @@ from contextlib import (
     AbstractContextManager,
     contextmanager,
 )
-from typing import Any, Callable, Union
+from types import TracebackType
+from typing import Any, Awaitable, Callable, Generator, TypeVar
+
+T = TypeVar("T")
 
 
 class Timer(AbstractContextManager, AbstractAsyncContextManager):
@@ -28,20 +33,17 @@ class Timer(AbstractContextManager, AbstractAsyncContextManager):
         ...     # ... async code ...
     """
 
-    def __init__(self, message: Union[str, Callable], decimal_places=1):
+    def __init__(self, message: str | Callable[..., T], decimal_places=1) -> None:
         func = None
         if callable(message):  # Use as decorator
             func = message
-            if hasattr(func, "__name__"):
-                self.__name__ = message = func.__name__
-            else:
-                message = str(func)
+            self.__name__ = message = func.__name__
         self.message = message
         self.func = func
         self.decimal_places = decimal_places
         self.end = self.start = time.time()
 
-    def _echo(self):
+    def _echo(self) -> None:
         self.end = self.echo_cost(self.start, self.decimal_places, self.message)
 
     @staticmethod
@@ -53,25 +55,30 @@ class Timer(AbstractContextManager, AbstractAsyncContextManager):
         print(message, "Cost:", cost, "seconds")
         return end
 
-    async def __aenter__(self):
+    async def __aenter__(self) -> "Timer":
         return self.__enter__()
 
-    async def __aexit__(self, *args, **kwargs):
+    async def __aexit__(self, *args, **kwargs) -> None:
         self.__exit__(*args, **kwargs)
 
-    def __enter__(self):
+    def __enter__(self) -> "Timer":
         self.start = time.time()
         return self
 
-    def __exit__(self, *args, **kwargs):
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
         self._echo()
 
-    def _recreate_cm(self):
+    def _recreate_cm(self) -> "Timer":
         return self.__class__(self.func or self.message, self.decimal_places)
 
-    def __call__(self, *args, **kwargs) -> Any:
+    def __call__(self, *args, **kwargs) -> None | T:
         if self.func is None:
-            return
+            return None
         if inspect.iscoroutinefunction(self.func):
 
             @functools.wraps(self.func)
@@ -86,7 +93,7 @@ class Timer(AbstractContextManager, AbstractAsyncContextManager):
 
 
 @contextmanager
-def timer(message: str, decimal_places=1):
+def timer(message: str, decimal_places=1) -> Generator[None, None, None]:
     """Print time cost of the function.
 
     Usage::
@@ -104,7 +111,10 @@ def timer(message: str, decimal_places=1):
         Timer.echo_cost(start, decimal_places, message)
 
 
-def timeit(func):
+FnT = TypeVar("FnT", Awaitable[Any], Any)
+
+
+def timeit(func: Callable[..., FnT]) -> Callable[..., FnT]:
     """Print time cost of the function.
 
     Usage::
@@ -123,14 +133,14 @@ def timeit(func):
     if inspect.iscoroutinefunction(func):
 
         @functools.wraps(func)
-        async def deco(*args, **kwargs):
+        async def deco(*args, **kwargs) -> Any:
             async with Timer(func_name):
                 return await func(*args, **kwargs)
 
     else:
 
         @functools.wraps(func)
-        def deco(*args, **kwargs):
+        def deco(*args, **kwargs) -> Any:
             with Timer(func_name):
                 return func(*args, **kwargs)
 
