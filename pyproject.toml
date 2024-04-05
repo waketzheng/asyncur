@@ -23,6 +23,11 @@ coveralls = "^3.3.1"
 pandas = "*"
 openpyxl = "*"
 
+[tool.mypy]
+pretty = true
+ignore_missing_imports = true
+check_untyped_defs = true
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

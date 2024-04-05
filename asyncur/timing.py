@@ -11,7 +11,7 @@ from contextlib import (
 from types import TracebackType
 from typing import Any, Awaitable, Callable, Generator, TypeVar
 
-T = TypeVar("T")
+T_Retval = TypeVar("T_Retval", Awaitable[Any], Any)
 
 
 class Timer(AbstractContextManager, AbstractAsyncContextManager):
@@ -33,13 +33,12 @@ class Timer(AbstractContextManager, AbstractAsyncContextManager):
         ...     # ... async code ...
     """
 
-    def __init__(self, message: str | Callable[..., T], decimal_places=1) -> None:
-        func = None
+    def __init__(self, message: str | Callable, decimal_places=1) -> None:
         if callable(message):  # Use as decorator
             func = message
             self.__name__ = message = func.__name__
+            self.func: Callable = func
         self.message = message
-        self.func = func
         self.decimal_places = decimal_places
         self.end = self.start = time.time()
 
@@ -74,22 +73,24 @@ class Timer(AbstractContextManager, AbstractAsyncContextManager):
         self._echo()
 
     def _recreate_cm(self) -> "Timer":
-        return self.__class__(self.func or self.message, self.decimal_places)
+        return self.__class__(
+            getattr(self, "func", None) or self.message, self.decimal_places
+        )
 
-    def __call__(self, *args, **kwargs) -> None | T:
-        if self.func is None:
+    def __call__(self, *args, **kwargs) -> Any:
+        if (func := getattr(self, "func", None)) is None:
             return None
-        if inspect.iscoroutinefunction(self.func):
+        if inspect.iscoroutinefunction(func):
 
-            @functools.wraps(self.func)
+            @functools.wraps(func)
             async def inner(*args, **kwds):
                 async with self._recreate_cm():
-                    return await self.func(*args, **kwargs)
+                    return await func(*args, **kwargs)
 
             return inner(*args, **kwargs)
         else:
             with self._recreate_cm():
-                return self.func(*args, **kwargs)
+                return func(*args, **kwargs)
 
 
 @contextmanager
@@ -111,10 +112,7 @@ def timer(message: str, decimal_places=1) -> Generator[None, None, None]:
         Timer.echo_cost(start, decimal_places, message)
 
 
-FnT = TypeVar("FnT", Awaitable[Any], Any)
-
-
-def timeit(func: Callable[..., FnT]) -> Callable[..., FnT]:
+def timeit(func: Callable[..., T_Retval]) -> Callable[..., T_Retval]:
     """Print time cost of the function.
 
     Usage::
@@ -133,14 +131,14 @@ def timeit(func: Callable[..., FnT]) -> Callable[..., FnT]:
     if inspect.iscoroutinefunction(func):
 
         @functools.wraps(func)
-        async def deco(*args, **kwargs) -> FnT:
+        async def deco(*args, **kwargs) -> T_Retval:
             async with Timer(func_name):
                 return await func(*args, **kwargs)
 
     else:
 
         @functools.wraps(func)
-        def deco(*args, **kwargs) -> FnT:
+        def deco(*args, **kwargs) -> T_Retval:
             with Timer(func_name):
                 return func(*args, **kwargs)
 

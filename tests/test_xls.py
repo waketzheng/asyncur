@@ -12,10 +12,7 @@ async def test_read():
     df = await read_excel(demo)
     df2 = await read_excel(demo.read_bytes())
     df3 = await read_excel(anyio.Path(demo))
-    assert (
-        df.columns.all() == df2.columns.all() and df2.columns.all() == df3.columns.all()
-    )
-    assert df.values.all() == df2.values.all() and df2.values.all() == df3.values.all()
+    assert df2.compare(df).empty and df3.compare(df).empty
     data = df_to_datas(df)
     assert data == [
         {"Column1": "row1-\\t%c", "Column2\nMultiLines": 0, "Column 3": 1, 4: ""},

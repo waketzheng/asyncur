@@ -33,6 +33,21 @@ async def test_wait_for():
         await wait_for(do_sth(), 0.1)
 
 
+class MockServer:
+    limit = 50
+    count = 0
+
+    @classmethod
+    async def response(cls) -> int:
+        cls.count += 1
+        await anyio.sleep(0.1)
+        status_code = 200
+        if cls.count > cls.limit:
+            status_code = 400
+        cls.count -= 1
+        return status_code
+
+
 class TestGather:
     @pytest.mark.anyio
     async def test_gather(self):
@@ -79,6 +94,15 @@ class TestGather:
     async def test_gather_without_raise(self):
         results = await bulk_gather(self.create_coros_for_raise(), raises=False)
         assert results == (None, None, None)
+
+    @pytest.mark.anyio
+    async def test_bulk(self):
+        tasks = [MockServer.response() for _ in range(200)]
+        results = await bulk_gather(tasks, MockServer.limit)
+        assert all(i == 200 for i in results)
+        tasks = [MockServer.response() for _ in range(200)]
+        results = await gather(*tasks)
+        assert any(i == 400 for i in results)
 
 
 class TestStartTasks:
