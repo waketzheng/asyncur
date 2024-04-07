@@ -344,13 +344,13 @@ test = ["pytest (>=6)"]
 
 [[package]]
 name = "fast-dev-cli"
-version = "0.6.2"
+version = "0.6.4"
 description = ""
 optional = false
-python-versions = ">=3.11,<4.0"
+python-versions = "<4.0,>=3.11"
 files = [
-    {file = "fast_dev_cli-0.6.2-py3-none-any.whl", hash = "sha256:0750696e834ee78263af8b94d706da1906c7604c544d8913343a3ef2ecc821a9"},
-    {file = "fast_dev_cli-0.6.2.tar.gz", hash = "sha256:4b8aed8c96867f025262ae14fe78bfbe15b5924379d57db6a1ea2c763dda8996"},
+    {file = "fast_dev_cli-0.6.4-py3-none-any.whl", hash = "sha256:c5545afc481913fd6b7c93ed3811f1b5a98767d47c2ed60ff9005f817089238f"},
+    {file = "fast_dev_cli-0.6.4.tar.gz", hash = "sha256:e2a52e7c7d3f7fec7862067953ab09a86ec5dab846b265596707dc655442ac98"},
 ]
 
 [package.dependencies]
@@ -360,12 +360,12 @@ click = ">=7.1.1"
 coverage = {version = ">=6.5.0", optional = true, markers = "extra == \"all\""}
 isort = {version = ">=5.12.0", optional = true, markers = "extra == \"all\""}
 mypy = {version = ">=1.5.0", optional = true, markers = "extra == \"all\""}
-pytest = {version = ">=8.0.2,<9.0.0", optional = true, markers = "extra == \"all\""}
+pytest = {version = ">=8.1.1,<9.0.0", optional = true, markers = "extra == \"all\""}
 ruff = {version = ">=0.3", optional = true, markers = "extra == \"all\""}
-typer = {version = ">=0.9.0", extras = ["all"], optional = true, markers = "extra == \"all\""}
+typer = {version = ">=0.12.0", optional = true, markers = "extra == \"all\""}
 
 [package.extras]
-all = ["black (>=23.9.1)", "bumpversion (>=0.6.0,<0.7.0)", "coverage (>=6.5.0)", "isort (>=5.12.0)", "mypy (>=1.5.0)", "pytest (>=8.0.2,<9.0.0)", "ruff (>=0.3)", "typer[all] (>=0.9.0)"]
+all = ["black (>=23.9.1)", "bumpversion (>=0.6.0,<0.7.0)", "coverage (>=6.5.0)", "isort (>=5.12.0)", "mypy (>=1.5.0)", "pytest (>=8.1.1,<9.0.0)", "ruff (>=0.3)", "typer (>=0.12.0)"]
 
 [[package]]
 name = "idna"
@@ -854,53 +854,20 @@ files = [
 
 [[package]]
 name = "typer"
-version = "0.12.0"
+version = "0.12.1"
 description = "Typer, build great CLIs. Easy to code. Based on Python type hints."
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "typer-0.12.0-py3-none-any.whl", hash = "sha256:0441a0bb8962fb4383b8537ada9f7eb2d0deda0caa2cfe7387cc221290f617e4"},
-    {file = "typer-0.12.0.tar.gz", hash = "sha256:900fe786ce2d0ea44653d3c8ee4594a22a496a3104370ded770c992c5e3c542d"},
-]
-
-[package.dependencies]
-typer-cli = "0.12.0"
-typer-slim = {version = "0.12.0", extras = ["standard"]}
-
-[[package]]
-name = "typer-cli"
-version = "0.12.0"
-description = "Typer, build great CLIs. Easy to code. Based on Python type hints."
-optional = false
-python-versions = ">=3.7"
-files = [
-    {file = "typer_cli-0.12.0-py3-none-any.whl", hash = "sha256:7b7e2dd49f59974bb5a869747045d5444b17bffb851e006cd424f602d3578104"},
-    {file = "typer_cli-0.12.0.tar.gz", hash = "sha256:603ed3d5a278827bd497e4dc73a39bb714b230371c8724090b0de2abdcdd9f6e"},
-]
-
-[package.dependencies]
-typer-slim = {version = "0.12.0", extras = ["standard"]}
-
-[[package]]
-name = "typer-slim"
-version = "0.12.0"
-description = "Typer, build great CLIs. Easy to code. Based on Python type hints."
-optional = false
-python-versions = ">=3.7"
-files = [
-    {file = "typer_slim-0.12.0-py3-none-any.whl", hash = "sha256:ddd7042b29a32140528caa415750bcae54113ba0c32270ca11a6f64069ddadf9"},
-    {file = "typer_slim-0.12.0.tar.gz", hash = "sha256:3e8a3f17286b173d76dca0fd4e02651c9a2ce1467b3754876b1ac4bd72572beb"},
+    {file = "typer-0.12.1-py3-none-any.whl", hash = "sha256:43ebb23c8a358c3d623e31064359a65f50229d0bf73ae8dfd203f49d9126ae06"},
+    {file = "typer-0.12.1.tar.gz", hash = "sha256:72d218ef3c686aed9c6ff3ca25b238aee0474a1628b29c559b18b634cfdeca88"},
 ]
 
 [package.dependencies]
 click = ">=8.0.0"
-rich = {version = ">=10.11.0", optional = true, markers = "extra == \"standard\""}
-shellingham = {version = ">=1.3.0", optional = true, markers = "extra == \"standard\""}
+rich = ">=10.11.0"
+shellingham = ">=1.3.0"
 typing-extensions = ">=3.7.4.3"
-
-[package.extras]
-all = ["rich (>=10.11.0)", "shellingham (>=1.3.0)"]
-standard = ["rich (>=10.11.0)", "shellingham (>=1.3.0)"]
 
 [[package]]
 name = "types-pytz"
@@ -915,13 +882,13 @@ files = [
 
 [[package]]
 name = "typing-extensions"
-version = "4.10.0"
+version = "4.11.0"
 description = "Backported and Experimental Type Hints for Python 3.8+"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "typing_extensions-4.10.0-py3-none-any.whl", hash = "sha256:69b1a937c3a517342112fb4c6df7e72fc39a38e7891a5730ed4985b5214b5475"},
-    {file = "typing_extensions-4.10.0.tar.gz", hash = "sha256:b0abd7c89e8fb96f98db18d86106ff1d90ab692004eb746cf6eda2682f91b3cb"},
+    {file = "typing_extensions-4.11.0-py3-none-any.whl", hash = "sha256:c1f94d72897edaf4ce775bb7558d5b79d8126906a14ea5ed1635921406c0387a"},
+    {file = "typing_extensions-4.11.0.tar.gz", hash = "sha256:83f085bd5ca59c80295fc2a82ab5dac679cbe02b9f33f7d83af68e241bea51b0"},
 ]
 
 [[package]]
@@ -958,4 +925,4 @@ xls = ["openpyxl", "pandas"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "da7789eeb187a4792c390db312a28c8839c4532d60fab6546bbcd5acf2891f12"
+content-hash = "66623ea36a1564438c6deda812cc28110e4532e76bee1e5061f4d3c220b13e68"
