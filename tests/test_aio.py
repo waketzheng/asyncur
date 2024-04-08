@@ -8,6 +8,7 @@ import anyio
 import pytest
 
 from asyncur.aio import bulk_gather, gather, run_async, start_tasks, wait_for
+from asyncur.timing import Timer
 
 
 def test_run_async():
@@ -36,14 +37,16 @@ async def test_wait_for():
 class MockServer:
     limit = 50
     count = 0
+    OK = 200
+    ERROR = 400
 
     @classmethod
     async def response(cls) -> int:
         cls.count += 1
         await anyio.sleep(0.1)
-        status_code = 200
+        status_code = cls.OK
         if cls.count > cls.limit:
-            status_code = 400
+            status_code = cls.ERROR
         cls.count -= 1
         return status_code
 
@@ -97,12 +100,23 @@ class TestGather:
 
     @pytest.mark.anyio
     async def test_bulk(self):
-        tasks = [MockServer.response() for _ in range(200)]
-        results = await bulk_gather(tasks, MockServer.limit)
-        assert all(i == 200 for i in results)
-        tasks = [MockServer.response() for _ in range(200)]
-        results = await gather(*tasks)
-        assert any(i == 400 for i in results)
+        total = 200
+        with Timer("Use sema:"):
+            tasks = [MockServer.response() for _ in range(total)]
+            results = await bulk_gather(
+                tasks, bulk=MockServer.limit, use_semaphore=True
+            )
+            assert sum(i == MockServer.OK for i in results) == total
+        with Timer("Without sema:"):
+            tasks = [MockServer.response() for _ in range(total)]
+            results = await bulk_gather(
+                tasks, bulk=MockServer.limit, use_semaphore=False
+            )
+            assert all(i == MockServer.OK for i in results)
+        with Timer("All start:"):
+            tasks = [MockServer.response() for _ in range(total)]
+            results = await gather(*tasks)
+            assert any(i == MockServer.ERROR for i in results)
 
 
 class TestStartTasks:

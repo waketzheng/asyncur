@@ -925,4 +925,4 @@ xls = ["openpyxl", "pandas"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "66623ea36a1564438c6deda812cc28110e4532e76bee1e5061f4d3c220b13e68"
+content-hash = "da0db9a4cc31744777a34e52f249513beb7c384786c11b6190794d81d0fb1c76"

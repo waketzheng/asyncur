@@ -1,6 +1,6 @@
 import sys
 from contextlib import asynccontextmanager
-from typing import Any, Callable, Coroutine
+from typing import Any, Callable, Coroutine, Sequence
 
 import anyio
 
@@ -34,24 +34,44 @@ def run_async(coro: Coroutine | Callable) -> Any:
     return anyio.run(ensure_afunc(coro))
 
 
-async def gather(*coros) -> tuple:
+async def gather(*coros: Coroutine) -> tuple:
     """Similar like asyncio.gather"""
     return await bulk_gather(coros)
 
 
-async def bulk_gather(coros, bulk: int | None = None, raises=True) -> tuple:
+async def bulk_gather(
+    coros: Sequence[Coroutine], bulk=0, use_semaphore=True, raises=True
+) -> tuple:
+    """Similar like asyncio.gather, if bulk is not zero, running tasks will limit to {bulk} every moment.
+
+    :param coros: Coroutines
+    :param bulk: running tasks limit number, set 0 to be unlimit
+    :param use_semaphore: if True, use anyio.Semaphore to limit task number, else use multi task groups
+    :param raises: if True, raise Exception when coroutine failed, else return None
+    """
     total = len(coros)
     results = [None] * total
 
-    async def runner(coro, i):
+    async def runner(coro, i) -> None:
         results[i] = await coro
+
+    async def limited_runner(coro, i, sema) -> None:
+        async with sema:
+            results[i] = await coro
 
     try:
         if bulk:
-            for start in range(0, total, bulk):
+            if use_semaphore:
+                semaphore = anyio.Semaphore(bulk)
                 async with anyio.create_task_group() as tg:
-                    for index, coro in enumerate(coros[start : start + bulk]):
-                        tg.start_soon(runner, coro, start + index)
+                    async with semaphore:
+                        for i, coro in enumerate(coros):
+                            tg.start_soon(limited_runner, coro, i, semaphore)
+            else:
+                for start in range(0, total, bulk):
+                    async with anyio.create_task_group() as tg:
+                        for index, coro in enumerate(coros[start : start + bulk]):
+                            tg.start_soon(runner, coro, start + index)
         else:
             async with anyio.create_task_group() as tg:
                 for i, coro in enumerate(coros):
