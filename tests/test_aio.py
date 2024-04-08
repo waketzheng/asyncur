@@ -103,15 +103,11 @@ class TestGather:
         total = 200
         with Timer("Use sema:"):
             tasks = [MockServer.response() for _ in range(total)]
-            results = await bulk_gather(
-                tasks, bulk=MockServer.limit, use_semaphore=True
-            )
+            results = await bulk_gather(tasks, bulk=MockServer.limit)
             assert sum(i == MockServer.OK for i in results) == total
         with Timer("Without sema:"):
             tasks = [MockServer.response() for _ in range(total)]
-            results = await bulk_gather(
-                tasks, bulk=MockServer.limit, use_semaphore=False
-            )
+            results = await bulk_gather(tasks, bulk=MockServer.limit, wait_last=True)
             assert all(i == MockServer.OK for i in results)
         with Timer("All start:"):
             tasks = [MockServer.response() for _ in range(total)]
