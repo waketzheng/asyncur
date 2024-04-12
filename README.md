@@ -25,12 +25,16 @@ poetry add asyncur
 
 ## Usage
 
-- gather/run_async
+- bulk_gather/gather/run_async
 ```py
 >>> from asyncur import gather, run_async
 >>> async def foo():
 ...     return 1
 ...
+>>> await bulk_gather([foo(), foo()])
+(1, 1)
+>>> await gather(foo(), foo())
+(1, 1)
 >>> run_async(gather(foo(), foo()))
 (1, 1)
 ```

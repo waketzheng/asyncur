@@ -1,14 +1,22 @@
 import sys
 from contextlib import asynccontextmanager
-from typing import Any, Callable, Coroutine, Sequence
+from typing import Any, Awaitable, Callable, Coroutine, Sequence, TypeVar
+
+if sys.version_info >= (3, 11):
+    from typing import TypeVarTuple, Unpack
+else:
+    from typing_extensions import TypeVarTuple, Unpack  # pragma: no cover
+    from exceptiongroup import ExceptionGroup  # pragma: no cover
 
 import anyio
 
-if sys.version_info < (3, 11):
-    from exceptiongroup import ExceptionGroup  # pragma: no cover
+T_Retval = TypeVar("T_Retval")
+PosArgsT = TypeVarTuple("PosArgsT")
 
 
-def ensure_afunc(coro: Coroutine | Callable) -> Callable:
+def ensure_afunc(
+    coro: Coroutine[None, None, T_Retval] | Callable[..., Awaitable[T_Retval]]
+) -> Callable[..., Awaitable[T_Retval]]:
     """Wrap coroutine to be async function"""
     if callable(coro):
         return coro
@@ -19,7 +27,9 @@ def ensure_afunc(coro: Coroutine | Callable) -> Callable:
     return do_await
 
 
-def run_async(coro: Coroutine | Callable) -> Any:
+def run_async(
+    coro: Coroutine[None, None, T_Retval] | Callable[..., Awaitable[T_Retval]]
+) -> T_Retval:
     """Compare with anyio.run and asyncio.run
 
     Usage::
@@ -34,18 +44,31 @@ def run_async(coro: Coroutine | Callable) -> Any:
     return anyio.run(ensure_afunc(coro))
 
 
-async def gather(*coros: Coroutine) -> tuple:
-    """Similar like asyncio.gather"""
-    return await bulk_gather(coros)
+def run(
+    func: (
+        Coroutine[None, None, T_Retval]
+        | Callable[[Unpack[PosArgsT]], Awaitable[T_Retval]]
+    ),
+    *args: Unpack[PosArgsT],
+    backend: str = "asyncio",
+    backend_options: dict[str, Any] | None = None,
+) -> T_Retval:
+    if not callable(func):
+
+        async def do_await() -> T_Retval:
+            return await func
+
+        return anyio.run(do_await, backend=backend, backend_options=backend_options)
+    return anyio.run(func, *args, backend=backend, backend_options=backend_options)
 
 
 async def bulk_gather(
-    coros: Sequence[Coroutine], bulk=0, wait_last=False, raises=True
+    coros: Sequence[Coroutine], limit=0, wait_last=False, raises=True
 ) -> tuple:
     """Similar like asyncio.gather, if bulk is not zero, running tasks will limit to {bulk} every moment.
 
     :param coros: Coroutines
-    :param bulk: running tasks limit number, set 0 to be unlimit
+    :param limit: running tasks limit number, set 0 to be unlimit
     :param wait_last: if True, wait last bulk tasks to complete then start new task group, else use anyio.CapacityLimiter to limit task number
     :param raises: if True, raise Exception when coroutine failed, else return None
     """
@@ -60,14 +83,14 @@ async def bulk_gather(
             results[i] = await coro
 
     try:
-        if bulk:
+        if limit:
             if wait_last:
-                for start in range(0, total, bulk):
+                for start in range(0, total, limit):
                     async with anyio.create_task_group() as tg:
-                        for index, coro in enumerate(coros[start : start + bulk]):
+                        for index, coro in enumerate(coros[start : start + limit]):
                             tg.start_soon(runner, coro, start + index)
             else:
-                limiter = anyio.CapacityLimiter(bulk)
+                limiter = anyio.CapacityLimiter(limit)
                 async with anyio.create_task_group() as tg:
                     for i, coro in enumerate(coros):
                         tg.start_soon(limited_runner, coro, i, limiter)
@@ -80,6 +103,11 @@ async def bulk_gather(
             raise e.exceptions[0]
 
     return tuple(results)
+
+
+async def gather(*coros: Coroutine) -> tuple:
+    """Similar like asyncio.gather"""
+    return await bulk_gather(coros)
 
 
 @asynccontextmanager

@@ -7,7 +7,7 @@ from typing import Any
 import anyio
 import pytest
 
-from asyncur.aio import bulk_gather, gather, run_async, start_tasks, wait_for
+from asyncur.aio import bulk_gather, gather, run, run_async, start_tasks, wait_for
 from asyncur.timing import Timer
 
 
@@ -21,6 +21,21 @@ def test_run_async():
     assert run_async(foo(None)) is None
     assert run_async(foo(foo)) == foo
     assert run_async(functools.partial(foo, 2)) == 2
+
+
+def test_run():
+    async def foo(sth: Any = ""):
+        return sth
+
+    assert run(foo) == ""
+    assert run(foo()) == ""
+    assert run(foo(1)) == 1
+    assert run(foo(None)) is None
+    assert run(foo(foo)) == foo
+    assert run(functools.partial(foo, 2)) == 2
+    assert run(foo, 2) == 2
+    assert run(foo, 2, backend="asyncio") == 2
+    assert run(foo, 2, backend="asyncio", backend_options=None) == 2
 
 
 @pytest.mark.anyio
@@ -103,11 +118,11 @@ class TestGather:
         total = 200
         with Timer("Use sema:"):
             tasks = [MockServer.response() for _ in range(total)]
-            results = await bulk_gather(tasks, bulk=MockServer.limit)
+            results = await bulk_gather(tasks, MockServer.limit)
             assert sum(i == MockServer.OK for i in results) == total
         with Timer("Without sema:"):
             tasks = [MockServer.response() for _ in range(total)]
-            results = await bulk_gather(tasks, bulk=MockServer.limit, wait_last=True)
+            results = await bulk_gather(tasks, MockServer.limit, wait_last=True)
             assert all(i == MockServer.OK for i in results)
         with Timer("All start:"):
             tasks = [MockServer.response() for _ in range(total)]
