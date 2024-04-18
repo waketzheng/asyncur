@@ -39,9 +39,8 @@ jobs:
           poetry run pip install coveralls
       - name: Check code style and Type Hint
         run: |
-          poetry run isort --check-only --src=asyncur .
-          poetry run black --check --fast .
-          poetry run ruff check .
+          poetry run ruff check --extend-select=I .
+          poetry run ruff format --check .
           poetry run mypy .
       - name: build
         run: poetry build

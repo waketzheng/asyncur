@@ -5,8 +5,8 @@ from typing import Any, Awaitable, Callable, Coroutine, Sequence, TypeVar
 if sys.version_info >= (3, 11):
     from typing import TypeVarTuple, Unpack
 else:
-    from typing_extensions import TypeVarTuple, Unpack  # pragma: no cover
     from exceptiongroup import ExceptionGroup  # pragma: no cover
+    from typing_extensions import TypeVarTuple, Unpack  # pragma: no cover
 
 import anyio
 
@@ -15,7 +15,7 @@ PosArgsT = TypeVarTuple("PosArgsT")
 
 
 def ensure_afunc(
-    coro: Coroutine[None, None, T_Retval] | Callable[..., Awaitable[T_Retval]]
+    coro: Coroutine[None, None, T_Retval] | Callable[..., Awaitable[T_Retval]],
 ) -> Callable[..., Awaitable[T_Retval]]:
     """Wrap coroutine to be async function"""
     if callable(coro):
@@ -28,7 +28,7 @@ def ensure_afunc(
 
 
 def run_async(
-    coro: Coroutine[None, None, T_Retval] | Callable[..., Awaitable[T_Retval]]
+    coro: Coroutine[None, None, T_Retval] | Callable[..., Awaitable[T_Retval]],
 ) -> T_Retval:
     """Compare with anyio.run and asyncio.run
 
