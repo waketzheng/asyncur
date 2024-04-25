@@ -1,9 +1,9 @@
 import importlib.metadata
 from pathlib import Path
 
-from asyncur.aio import gather, run, run_async, start_tasks, wait_for
-from asyncur.timing import timeit
-from asyncur.utils import AttrDict
+from .aio import gather, run, run_async, start_tasks, wait_for
+from .timing import timeit
+from .utils import AttrDict
 
 __version__ = importlib.metadata.version(Path(__file__).parent.name)
 __all__ = (

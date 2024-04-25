@@ -31,7 +31,7 @@ poetry add asyncur
 >>> async def foo():
 ...     return 1
 ...
->>> await bulk_gather([foo(), foo()])
+>>> await bulk_gather([foo(), foo()], limit=200)
 (1, 1)
 >>> await gather(foo(), foo())
 (1, 1)
