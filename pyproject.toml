@@ -10,8 +10,8 @@ python = "^3.10"
 anyio = ">=3.7.1"
 pandas = {version = "^2.2.2", optional = true}
 openpyxl = {version = "^3.1.2", optional = true}
-exceptiongroup = { version = ">=1.2.0", python = "<3.11" }
-typing-extensions = { version = "^4.11.0", python = "<3.11" }
+exceptiongroup = "^1.2.1"
+typing-extensions = "^4.11.0"
 
 [tool.poetry.extras]
 xls = ["pandas", "openpyxl"]
@@ -21,12 +21,11 @@ xls = ["pandas", "openpyxl"]
 fast-dev-cli = {version = ">=0.7.0", python = ">=3.11", extras = ["all"]}
 pandas-stubs = "^2.2.1.240316"
 coveralls = "^3.3.1"
-ruff = ">=0.3"
-pandas = "*"
-openpyxl = "*"
-mypy = "*"
-pytest = "*"
-coverage = "*"
+ruff = "^0.4.2"
+pandas = "^2.2.2"
+openpyxl = "^3.1.2"
+mypy = "^1.10.0"
+pytest = "^8.2.0"
 
 [tool.mypy]
 pretty = true
