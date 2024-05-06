@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "asyncur"
-version = "0.5.0"
+version = "0.5.1"
 description = "Async functions to compare with anyio and asyncio, and toolkit to read excel with async/await."
 authors = ["Waket Zheng <waketzheng@gmail.com>"]
 readme = "README.md"
@@ -21,7 +21,7 @@ xls = ["pandas", "openpyxl"]
 fast-dev-cli = {version = ">=0.7.0", python = ">=3.11", extras = ["all"]}
 pandas-stubs = "^2.2.1.240316"
 coveralls = {version = ">=3.3.1", python = ">=3.10,<3.13"}
-ruff = "^0.4.2"
+ruff = "^0.4.3"
 pandas = "^2.2.2"
 openpyxl = "^3.1.2"
 mypy = "^1.10.0"

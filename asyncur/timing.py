@@ -2,14 +2,20 @@ from __future__ import annotations
 
 import functools
 import inspect
+import sys
 import time
 from contextlib import (
     AbstractAsyncContextManager,
     AbstractContextManager,
-    contextmanager,
 )
 from types import TracebackType
-from typing import Any, Awaitable, Callable, Generator, TypeVar
+from typing import TYPE_CHECKING, Any, Awaitable, Callable, TypeVar, overload
+
+if TYPE_CHECKING:  # pragma: no cover
+    if sys.version_info >= (3, 11):
+        from typing import Self
+    else:
+        from typing_extensions import Self
 
 T_Retval = TypeVar("T_Retval", Awaitable[Any], Any)
 
@@ -60,7 +66,7 @@ class Timer(AbstractContextManager, AbstractAsyncContextManager):
     async def __aexit__(self, *args, **kwargs) -> None:
         self.__exit__(*args, **kwargs)
 
-    def __enter__(self) -> "Timer":
+    def __enter__(self) -> "Self":
         self.start = time.time()
         return self
 
@@ -72,7 +78,7 @@ class Timer(AbstractContextManager, AbstractAsyncContextManager):
     ) -> None:
         self._echo()
 
-    def _recreate_cm(self) -> "Timer":
+    def _recreate_cm(self) -> "Self":
         return self.__class__(
             getattr(self, "func", None) or self.message, self.decimal_places
         )
@@ -93,26 +99,17 @@ class Timer(AbstractContextManager, AbstractAsyncContextManager):
                 return func(*args, **kwargs)
 
 
-@contextmanager
-def timer(message: str, decimal_places=1) -> Generator[None, None, None]:
-    """Print time cost of the function.
-
-    Usage::
-        >>> @timer('message')
-        >>> def read_text(filename):
-        ...     return Path(filename).read_text()
-
-        >>> with timer('do sth ...'):
-        ...     # ... sync code ...
-    """
-    start = time.time()
-    try:
-        yield
-    finally:
-        Timer.echo_cost(start, decimal_places, message)
+@overload
+def timeit(func: str) -> Timer: ...  # pragma: no cover
 
 
-def timeit(func: Callable[..., T_Retval]) -> Callable[..., T_Retval]:
+@overload
+def timeit(
+    func: Callable[..., T_Retval],
+) -> Callable[..., T_Retval]: ...  # pragma: no cover
+
+
+def timeit(func: str | Callable[..., T_Retval]) -> Timer | Callable[..., T_Retval]:
     """Print time cost of the function.
 
     Usage::
@@ -126,7 +123,12 @@ def timeit(func: Callable[..., T_Retval]) -> Callable[..., T_Retval]:
 
         >>> res = timeit(sync_func)(*args, **kwargs)
         >>> result = await timeit(async_func)(*args, **kwargs)
+        >>> with timeit('message'):
+        ...     await main()
+
     """
+    if isinstance(func, str):
+        return Timer(func)
     func_name = getattr(func, "__name__", str(func))
     if inspect.iscoroutinefunction(func):
 

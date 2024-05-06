@@ -5,7 +5,7 @@ from io import StringIO
 import anyio
 import pytest
 
-from asyncur.timing import Timer, timeit, timer
+from asyncur.timing import Timer, timeit
 
 
 @contextmanager
@@ -151,11 +151,11 @@ class TestTimer:
 
 
 @pytest.mark.anyio
-async def test_timer():
+async def test_with_timeit():
     start = time.time()
     message = "hello kitty"
     with capture_stdout() as stream:
-        with timer(message):
+        with timeit(message):
             await raw_sleep1()
             raw_wait_for()
             await raw_sleep(0.21)
