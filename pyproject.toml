@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "asyncur"
-version = "0.5.1"
+version = "0.5.2"
 description = "Async functions to compare with anyio and asyncio, and toolkit to read excel with async/await."
 authors = ["Waket Zheng <waketzheng@gmail.com>"]
 readme = "README.md"
@@ -12,6 +12,7 @@ pandas = {version = "^2.2.2", optional = true}
 openpyxl = {version = "^3.1.2", optional = true}
 exceptiongroup = "^1.2.1"
 typing-extensions = "^4.11.0"
+redis = "^5.0.4"
 
 [tool.poetry.extras]
 xls = ["pandas", "openpyxl"]
@@ -26,11 +27,23 @@ pandas = "^2.2.2"
 openpyxl = "^3.1.2"
 mypy = "^1.10.0"
 pytest = "^8.2.0"
+types-redis = "^4.6.0.20240425"
+fastapi = "^0.111.0"
+asgi-lifespan = "^2.1.0"
 
 [tool.mypy]
 pretty = true
 ignore_missing_imports = true
 check_untyped_defs = true
+
+[tool.coverage.report]
+omit = ["*/tests/*", "test_*"]
+exclude_lines = [
+    "pragma: no cover",
+    "@overload",
+    'if __name__ == "__main__":',
+    "if TYPE_CHECKING:",
+]
 
 [build-system]
 requires = ["poetry-core"]

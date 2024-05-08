@@ -56,6 +56,32 @@ sleep_test Cost: 3.0 seconds
 >>> sleep_test2()
 sleep_test2 Cost: 3.1 seconds
 ```
+- AsyncRedis
+```py
+from contextlib import asynccontextmanager
+
+from asyncur import AsyncRedis
+from fastapi import FastAPI, Request
+
+@asynccontextmanager
+async def lifespan(app):
+    async with AsyncRedis(app):
+        yield
+
+app = FastAPI(lifespan=lifespan)
+
+@app.get('/')
+async def root(request: Request) -> list[str]:
+    return await AsyncRedis(request).keys()
+
+@app.get('/redis')
+async def get_value_from_redis_by_key(request: Request, key: str) -> str:
+    value = await AsyncRedis(request).get(key)
+    if not value:
+        return ''
+    return value.decode()
+```
+
 
 - Read Excel File(need to install with xls extra: `pip install "asyncur[xls]"`)
 ```py
