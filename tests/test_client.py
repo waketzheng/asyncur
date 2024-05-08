@@ -10,11 +10,6 @@ from .main import app
 
 
 @pytest.fixture(scope="session")
-def anyio_backend():
-    return "asyncio"
-
-
-@pytest.fixture(scope="session")
 async def client():
     async with LifespanManager(app) as manager:
         transport = ASGITransport(app=manager.app)  # type:ignore[arg-type]
