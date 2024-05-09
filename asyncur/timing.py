@@ -9,7 +9,14 @@ from contextlib import (
     AbstractContextManager,
 )
 from types import TracebackType
-from typing import TYPE_CHECKING, Any, Awaitable, Callable, TypeVar, overload
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Awaitable,
+    Callable,
+    TypeVar,
+    overload,
+)
 
 if TYPE_CHECKING:  # pragma: no cover
     if sys.version_info >= (3, 11):

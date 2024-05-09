@@ -3,7 +3,7 @@
 set -e
 set -x
 
-checkfiles="ensure_import"
+checkfiles="."
 [ -f ../pyproject.toml ] && cd ..
 
 ((poetry run ruff check $checkfiles && poetry run ruff format --check $checkfiles) ||
