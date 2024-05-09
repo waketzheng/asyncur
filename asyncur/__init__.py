@@ -1,12 +1,11 @@
-import importlib.metadata
-from pathlib import Path
+import importlib.metadata as importlib_metadata
 
 from .aio import gather, run, run_async, start_tasks, wait_for
 from .client import AsyncRedis
 from .timing import timeit
 from .utils import AttrDict
 
-__version__ = importlib.metadata.version(Path(__file__).parent.name)
+__version__ = importlib_metadata.version(__name__)
 __all__ = (
     "__version__",
     "AsyncRedis",
