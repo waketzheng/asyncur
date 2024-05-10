@@ -1,6 +1,6 @@
 import subprocess
 
-from tortoise import __version__
+from asyncur import __version__
 
 
 def test_version():
