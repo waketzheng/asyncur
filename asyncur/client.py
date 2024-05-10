@@ -25,8 +25,8 @@ class AsyncRedis(RedisClient):
         >>> from contextlib import asynccontextmanager
         >>> from fastapi import FastAPI, Request
         >>> @asynccontextmanager
-        ... async def lifespan(app: FastAPI):
-        ...     async with AsyncRedis(app):
+        ... async def lifespan(fastapi_app: FastAPI):
+        ...     async with AsyncRedis(fastapi_app):
         ...         yield
         ...
         >>> app = FastAPI(lifespan=lifespan)

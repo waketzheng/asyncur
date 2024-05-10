@@ -37,6 +37,7 @@ class Timer(AbstractContextManager, AbstractAsyncContextManager):
 
         >>> @Timer
         >>> def read_text(filename):
+        ...     from pathlib import Path
         ...     return Path(filename).read_text()
 
         >>> with Timer('do sth ...'):
@@ -96,9 +97,9 @@ class Timer(AbstractContextManager, AbstractAsyncContextManager):
         if inspect.iscoroutinefunction(func):
 
             @functools.wraps(func)
-            async def inner(*args, **kwds):
+            async def inner(*gs, **kw):
                 async with self._recreate_cm():
-                    return await func(*args, **kwargs)
+                    return await func(*gs, **kw)
 
             return inner(*args, **kwargs)
         else:
@@ -126,9 +127,12 @@ def timeit(func: str | Callable[..., T_Retval]) -> Timer | Callable[..., T_Retva
 
         >>> @timeit
         >>> def read_text(filename):
+        ...     from pathlib import Path
         ...     return Path(filename).read_text()
-
+        >>> args, kwargs = (), {}
+        >>> def sync_func(): ...
         >>> res = timeit(sync_func)(*args, **kwargs)
+        >>> async def async_func(): ...
         >>> result = await timeit(async_func)(*args, **kwargs)
         >>> with timeit('message'):
         ...     await main()

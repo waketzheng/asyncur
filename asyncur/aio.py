@@ -65,22 +65,23 @@ def run(
 async def bulk_gather(
     coros: Sequence[Coroutine], limit=0, wait_last=False, raises=True
 ) -> tuple:
-    """Similar like asyncio.gather, if bulk is not zero, running tasks will limit to {bulk} every moment.
+    """Similar like `asyncio.gather`, if bulk is not zero, running tasks will limit to {bulk} every moment.
 
     :param coros: Coroutines
-    :param limit: running tasks limit number, set 0 to be unlimit
-    :param wait_last: if True, wait last bulk tasks to complete then start new task group, else use anyio.CapacityLimiter to limit task number
-    :param raises: if True, raise Exception when coroutine failed, else return None
+    :param limit: running tasks limit number, set 0 to be unlimit.
+    :param wait_last: if True, wait last bulk tasks to complete then start new task group,
+        else use anyio.CapacityLimiter to limit task number.
+    :param raises: if True, raise Exception when coroutine failed, else return None.
     """
     total = len(coros)
     results = [None] * total
 
-    async def runner(coro, i) -> None:
-        results[i] = await coro
+    async def runner(_coro, _i) -> None:
+        results[_i] = await _coro
 
-    async def limited_runner(coro, i, limiter) -> None:
-        async with limiter:
-            results[i] = await coro
+    async def limited_runner(_coro, _i, _limiter) -> None:
+        async with _limiter:
+            results[_i] = await _coro
 
     try:
         if limit:
