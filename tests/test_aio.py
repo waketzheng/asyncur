@@ -8,6 +8,7 @@ import anyio
 import pytest
 
 from asyncur.aio import bulk_gather, gather, run, run_async, start_tasks, wait_for
+from asyncur.exceptions import ParamsError
 from asyncur.timing import Timer
 
 
@@ -128,6 +129,44 @@ class TestGather:
             tasks = [MockServer.response() for _ in range(total)]
             results = await gather(*tasks)
             assert any(i == MockServer.ERROR for i in results)
+
+    @pytest.mark.anyio
+    async def test_bulk_batch_size(self):
+        total = 200
+        with Timer("Use sema:"):
+            tasks = [MockServer.response() for _ in range(total)]
+            results = await bulk_gather(tasks, batch_size=MockServer.limit)
+            assert sum(i == MockServer.OK for i in results) == total
+        with Timer("Without sema:"):
+            tasks = [MockServer.response() for _ in range(total)]
+            results = await bulk_gather(
+                tasks, batch_size=MockServer.limit, wait_last=True
+            )
+            assert all(i == MockServer.OK for i in results)
+
+    @pytest.mark.anyio
+    async def test_bulk_limit(self):
+        total = 200
+        with Timer("Use sema:"):
+            tasks = [MockServer.response() for _ in range(total)]
+            results = await bulk_gather(tasks, limit=MockServer.limit)
+            assert sum(i == MockServer.OK for i in results) == total
+        with Timer("Without sema:"):
+            tasks = [MockServer.response() for _ in range(total)]
+            results = await bulk_gather(tasks, limit=MockServer.limit, wait_last=True)
+            assert all(i == MockServer.OK for i in results)
+
+    @pytest.mark.anyio
+    async def test_bulk_conflict_or_warning(self):
+        tasks = [MockServer.response() for _ in range(200)]
+        with pytest.raises(ParamsError):
+            await bulk_gather(
+                tasks, batch_size=MockServer.limit + 1, limit=MockServer.limit
+            )
+        with pytest.deprecated_call():
+            await bulk_gather(
+                tasks, batch_size=MockServer.limit, limit=MockServer.limit
+            )
 
 
 class TestStartTasks:

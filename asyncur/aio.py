@@ -1,6 +1,11 @@
 import sys
+import warnings
 from contextlib import asynccontextmanager
 from typing import Any, Awaitable, Callable, Coroutine, Sequence, TypeVar
+
+import anyio
+
+from .exceptions import ParamsError
 
 if sys.version_info >= (3, 11):
     from typing import TypeVarTuple, Unpack
@@ -8,7 +13,6 @@ else:
     from exceptiongroup import ExceptionGroup  # pragma: no cover
     from typing_extensions import TypeVarTuple, Unpack  # pragma: no cover
 
-import anyio
 
 T_Retval = TypeVar("T_Retval")
 PosArgsT = TypeVarTuple("PosArgsT")
@@ -63,15 +67,21 @@ def run(
 
 
 async def bulk_gather(
-    coros: Sequence[Coroutine], limit=0, wait_last=False, raises=True
+    coros: Sequence[Coroutine],
+    batch_size=0,
+    wait_last=False,
+    raises=True,
+    *,
+    limit: int | None = None,
 ) -> tuple:
-    """Similar like `asyncio.gather`, if bulk is not zero, running tasks will limit to {bulk} every moment.
+    """Similar like `asyncio.gather`, if batch_size is not zero, running tasks will CapacityLimiter({batch_size}).
 
     :param coros: Coroutines
-    :param limit: running tasks limit number, set 0 to be unlimit.
+    :param batch_size: running tasks limit number, set 0 to be unlimit.
     :param wait_last: if True, wait last bulk tasks to complete then start new task group,
         else use anyio.CapacityLimiter to limit task number.
     :param raises: if True, raise Exception when coroutine failed, else return None.
+    :param limit: (deprecated) only leave it here to compare with old version.
     """
     total = len(coros)
     results = [None] * total
@@ -84,14 +94,26 @@ async def bulk_gather(
             results[_i] = await _coro
 
     try:
-        if limit:
+        if limit is not None:
+            if batch_size:
+                if batch_size != limit:
+                    raise ParamsError(f"Conflict value with {limit=} & {batch_size=}")
+                else:
+                    warnings.warn(
+                        "`limit` is deprecated, it's replaced by `batch_size`, feel free to keep only one.",
+                        DeprecationWarning,
+                        stacklevel=2,
+                    )
+            else:
+                batch_size = limit
+        if batch_size:
             if wait_last:
-                for start in range(0, total, limit):
+                for start in range(0, total, batch_size):
                     async with anyio.create_task_group() as tg:
-                        for index, coro in enumerate(coros[start : start + limit]):
+                        for index, coro in enumerate(coros[start : start + batch_size]):
                             tg.start_soon(runner, coro, start + index)
             else:
-                limiter = anyio.CapacityLimiter(limit)
+                limiter = anyio.CapacityLimiter(batch_size)
                 async with anyio.create_task_group() as tg:
                     for i, coro in enumerate(coros):
                         tg.start_soon(limited_runner, coro, i, limiter)
