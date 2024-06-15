@@ -39,6 +39,8 @@ jobs:
           poetry config virtualenvs.create false
       - name: Install requirements
         run: poetry install
+        env:
+          PYO3_USE_ABI3_FORWARD_COMPATIBILITY: 1
       - name: Check code style and Type Hint
         run: fast check
       - name: build
