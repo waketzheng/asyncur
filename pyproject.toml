@@ -20,7 +20,7 @@ xls = ["pandas", "openpyxl"]
 
 
 [tool.poetry.group.dev.dependencies]
-fast-dev-cli = "^0.7.3"
+fast-dev-cli = "^0.8.3"
 pandas = "^2.2.2"
 openpyxl = "^3.1.4"
 fastapi = "^0.111.0"
