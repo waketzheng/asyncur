@@ -10,8 +10,8 @@ if TYPE_CHECKING:  # pragma: no cover
 
 class RedisClient(aioredis.Redis, AbstractAsyncContextManager):
     def __init__(self, **kw) -> None:
-        if host := os.getenv("REDIS_HOST"):
-            kw.setdefault("host", host)
+        if "host" not in kw and (host := os.getenv("REDIS_HOST")):
+            kw["host"] = host
         super().__init__(**kw)
 
     async def __aexit__(self, *args, **kw):

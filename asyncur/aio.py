@@ -161,7 +161,9 @@ async def start_tasks(coro: Coroutine | Callable, *more: Coroutine | Callable):
                 tg.cancel_scope.cancel()
 
 
-async def wait_for(coro: Coroutine, timeout: int | float) -> Any:
+async def wait_for(
+    coro: Coroutine[None, None, T_Retval], timeout: int | float
+) -> T_Retval:
     """Similar like asyncio.wait_for"""
     with anyio.fail_after(timeout):
         return await coro
