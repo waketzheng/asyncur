@@ -8,6 +8,12 @@
 
 Some async functions that using anyio, and toolkit for excel read.
 
+> ⚠️ **Warning**
+>
+> `asyncur` is **no longer maintained**.
+>
+> You can **switch to [`asynctor`](https://github.com/waketzheng/asynctor)**.
+
 ## Installation
 
 <div class="termy">
